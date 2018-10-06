@@ -1,0 +1,46 @@
+#Security-Enhanced Linux
+sudo dpkg -l selinux*
+
+#Prerequisites
+sudo apt-get update
+sudo apt-get install -y autoconf gcc libc6 make wget unzip apache2 php libapache2-mod-php7.0 libgd2-xpm-dev
+
+#Downloading the Source
+cd /tmp
+wget -O nagioscore.tar.gz https://github.com/NagiosEnterprises/nagioscore/archive/nagios-4.4.1.tar.gz
+tar xzf nagioscore.tar.gz
+
+#Compile
+cd /tmp/nagioscore-nagios-4.4.1/
+sudo ./configure --with-httpd-conf=/etc/apache2/sites-enabled
+sudo make all
+
+#Create User And Group
+sudo make install-groups-users
+sudo usermod -a -G nagios www-data
+
+#Install Binaries
+sudo make install
+
+#Install Service / Daemon
+sudo make install-daemoninit
+
+#Install Command Mode
+sudo make install-commandmode
+
+#Install Configuration Files
+sudo make install-config
+
+#Install Apache Config Files
+sudo make install-webconf
+sudo a2enmod rewrite
+sudo a2enmod cgi
+
+ 
+#Configure Firewall
+sudo ufw allow Apache
+sudo ufw reload
+
+#Create nagiosadmin User Account
+sudo htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
+
